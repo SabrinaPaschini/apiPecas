@@ -32,3 +32,26 @@ app.get("/componentes", async (req, res) => {
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
 });
+
+app.post("/componentes", async (req, res) => {
+  const { tipo, medida, valor } = req.body;
+
+  // Validação: não deixar de inserir se faltar dado
+  if (!tipo || !medida || !valor) {
+    return res.status(400).json({ error: "Campos tipo, medida e valor são obrigatórios." });
+  }
+
+  try {
+    // Faz o INSERT com retorno do dado inserido
+    const resultado = await db.one(
+      'INSERT INTO componentes (tipo, medida, valor) VALUES ($1, $2, $3) RETURNING *;',
+      [tipo, medida, valor]
+    );
+
+    // Retorna o componente inserido
+    res.status(201).json(resultado);
+  } catch (error) {
+    console.error('Erro ao inserir componente:', error);
+    res.status(500).json({ error: "Erro ao inserir componente" });
+  }
+});
