@@ -1,37 +1,33 @@
-const express = require("express"); // importando o express
+const express = require("express");
+const cors = require("cors");
+const pgp = require("pg-promise")();
+
 const app = express();
 const port = 3000;
 
-const cors = require("cors"); // importando o cors, que é um pacote, que permite a conexão entre dois projetos diferentes
-app.use(cors());
+// Configuração do banco
+const db = pgp({
+  host: "localhost",
+  port: 5432,
+  database: "componentesEletronicos",
+  user: "postgres",
+  password: "1234",
+});
 
-// midleware para aceitar o Json
+app.use(cors());
 app.use(express.json());
 
-// ROTA GET
-
-app.get("/componentes", (req, res) => {
-  res.json(componentes);
+// Rota GET para buscar todos os componentes no banco
+app.get("/componentes", async (req, res) => {
+  try {
+    const componentes = await db.any("SELECT * FROM componentes");
+    res.json(componentes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message  });
+  }
 });
 
-// iniciando o servidor
-
-let componentes = [];
-
-// primeira rota POST para receber os dados do Angular
-
-app.post("/componentes", (req, res) => {
-  const componente = req.body;
-  componentes.push(componente); // salvando temporariamente
-
-  console.log("Componente recebido", componente);
-
-  // uma resposta de sucesso!
-
-  res
-    .status(201)
-    .json({ mensagem: "Componente recebido com sucesso", componente });
-});
 
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
