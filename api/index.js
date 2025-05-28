@@ -19,6 +19,7 @@ app.use(express.json());
 
 // Rota GET para buscar todos os componentes no banco
 app.get("/componentes", async (req, res) => {
+  
   try {
     const componentes = await db.any("SELECT * FROM componentes");
     res.json(componentes);
